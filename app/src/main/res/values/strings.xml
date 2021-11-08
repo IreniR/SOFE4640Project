@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">SOFE4640UCourseProject</string>
+    <string name="product_name">Chat Room</string>
+    <string name="google_login">Google Login</string>
+    <string name="logout_button">Logout</string>
+    <string name="login_btn">Login</string>
+    <string name="register_btn">Register</string>
+    <string name="enter_email_field">Email</string>
+    <string name="enter_user_password">Password</string>
+    <string name="registerBtnText">New User? Register Here</string>
+    <string name="registerTitle">Register</string>
+    <string name="register_confirm_password">Confirm Password</string>
+    <string name="registering_user">Register</string>
+    <string name="alreadyUserText">Already a member? Login Here</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="forgot_password_title">Forgot Password</string>
+    <string name="resetPasswordText">Reset Password</string>
+    <string name="reset_desc">We will send a link to your email to reset your password</string>
+</resources>

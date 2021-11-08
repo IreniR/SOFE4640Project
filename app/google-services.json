@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "987787009615",
+    "project_id": "sofe4640ucourseproject",
+    "storage_bucket": "sofe4640ucourseproject.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987787009615:android:51ab275902bd95a988943a",
+        "android_client_info": {
+          "package_name": "com.example.sofe4640ucourseproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "987787009615-dksefnmaakg21lqjs9skuji2dm34b4us.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDy5vMXWdI45-AeDWitYQnjq9Ch9-JZkqQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "987787009615-dksefnmaakg21lqjs9skuji2dm34b4us.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
