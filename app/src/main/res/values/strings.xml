@@ -16,4 +16,7 @@
     <string name="forgot_password_title">Forgot Password</string>
     <string name="resetPasswordText">Reset Password</string>
     <string name="reset_desc">We will send a link to your email to reset your password</string>
+    <string-array name="user_image">
+        <item>Default</item>
+    </string-array>
 </resources>

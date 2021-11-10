@@ -8,20 +8,30 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class HomePage extends AppCompatActivity {
-
+    RecyclerView recyclerView;
     TextView userName;
     Button logOutUserBtn;
-
+    String recyclerName[], recyclerDescription[];
+    int images[] = {R.drawable.userimage,R.drawable.userimage,R.drawable.userimage};
     @Override
     public void onCreate( Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
+
+        recyclerView = findViewById(R.id.recyclerView_friends);
+        recyclerName = new String[] {"Anuj","Ireni","Raj"};
+        recyclerDescription = new String[] {"welcome to Chat","welcome to Chat","welcome to Chat"};
+        UserAdapter myAdapter = new UserAdapter(this, recyclerName, recyclerDescription, images);
+        recyclerView.setAdapter(myAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         logOutUserBtn = findViewById(R.id.logout_btn);
         userName = findViewById(R.id.user_name);
