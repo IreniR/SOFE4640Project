@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -21,19 +20,20 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.186" />
+        app:layout_constraintVertical_bias="0.069" />
 
     <EditText
         android:id="@+id/register_email"
         android:layout_width="326dp"
         android:layout_height="47dp"
-        android:gravity="center"
         android:layout_marginBottom="20dp"
+        android:gravity="center"
         android:hint="@string/enter_email_field"
         app:layout_constraintBottom_toTopOf="@+id/register_password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.486"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="TouchTargetSizeCheck" />
 
     <EditText
         android:id="@+id/register_password"
@@ -42,8 +42,8 @@
         android:layout_marginBottom="20dp"
         android:gravity="center"
         android:hint="@string/enter_user_password"
-        android:textAlignment="gravity"
         android:inputType="textPassword"
+        android:textAlignment="gravity"
         app:layout_constraintBottom_toTopOf="@+id/register_confirm_psswrd"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.447"
@@ -68,14 +68,14 @@
         android:layout_height="57dp"
         android:layout_marginBottom="16dp"
         android:backgroundTint="#F44336"
+        android:onClick="onClick"
         android:text="@string/registering_user"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/alreadyMemberBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.433"
-        app:layout_constraintStart_toStartOf="parent"
-        android:onClick="onClick"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/alreadyMemberBtn"
@@ -84,10 +84,24 @@
         android:layout_marginBottom="168dp"
         android:background="@null"
         android:backgroundTint="#00FFFFFF"
+        android:onClick="onClick"
         android:text="@string/alreadyUserText"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.453"
         app:layout_constraintStart_toStartOf="parent"
-        android:onClick="onClick"/>
+        tools:ignore="TouchTargetSizeCheck" />
+
+    <EditText
+        android:id="@+id/register_name"
+        android:layout_width="326dp"
+        android:layout_height="48dp"
+        android:ems="10"
+        android:gravity="center"
+        android:hint="Name"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/register_email"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/registerTitle" />
 </androidx.constraintlayout.widget.ConstraintLayout>

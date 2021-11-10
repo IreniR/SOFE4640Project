@@ -60,7 +60,7 @@ public class LoginPage extends AppCompatActivity implements View.OnClickListener
 
         mAuth = FirebaseAuth.getInstance();
 
-        createRequest();
+//        createRequest();
 
         findViewById(R.id.google_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,15 +71,15 @@ public class LoginPage extends AppCompatActivity implements View.OnClickListener
 
     }
 
-    private void createRequest() {
-        // Configure Google Sign In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-    }
+//    private void createRequest() {
+//        // Configure Google Sign In
+//        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                .requestIdToken(getString(R.string.default_web_client_id))
+//                .requestEmail()
+//                .build();
+//
+//        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+//    }
 
     private void signIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();

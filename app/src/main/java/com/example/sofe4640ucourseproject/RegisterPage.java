@@ -24,7 +24,7 @@ import com.google.firebase.database.FirebaseDatabase;
 public class RegisterPage extends AppCompatActivity implements View.OnClickListener{
 
     private FirebaseAuth mAuth;
-    private EditText registerUserEmail, registerPassword, registerConfirmPassword;
+    private EditText registerUserEmail, registerPassword, registerConfirmPassword, registerName;
     private Button registerUserBtn, returnToLogin;
 
     @Override
@@ -32,6 +32,7 @@ public class RegisterPage extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.register_page);
 
+        registerName = (EditText) findViewById(R.id.register_name);
         registerUserEmail = (EditText) findViewById(R.id.register_email);
         registerPassword = (EditText) findViewById(R.id.register_password);
         registerConfirmPassword = (EditText) findViewById(R.id.register_confirm_psswrd);
@@ -66,6 +67,7 @@ public class RegisterPage extends AppCompatActivity implements View.OnClickListe
     private void registerUser() {
 
         String email = registerUserEmail.getText().toString().trim();
+        String name = registerName.getText().toString().trim();
         String password = registerPassword.getText().toString().trim();
         String confirmPassword = registerConfirmPassword.getText().toString().trim();
 
@@ -107,9 +109,8 @@ public class RegisterPage extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()){
-                    User user = new User(email);
-
-                    FirebaseDatabase.getInstance().getReference("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    User user = new User(name, email, mAuth.getUid());
+                    FirebaseDatabase.getInstance().getReference("Users").child(mAuth.getUid()).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if(task.isSuccessful()){
