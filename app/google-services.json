@@ -1,13 +1,14 @@
 {
   "project_info": {
     "project_number": "987787009615",
+    "firebase_url": "https://sofe4640ucourseproject-default-rtdb.firebaseio.com",
     "project_id": "sofe4640ucourseproject",
     "storage_bucket": "sofe4640ucourseproject.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:987787009615:android:51ab275902bd95a988943a",
+        "mobilesdk_app_id": "1:987787009615:android:3403ccd498c238d588943a",
         "android_client_info": {
           "package_name": "com.example.sofe4640ucourseproject"
         }
