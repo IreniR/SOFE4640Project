@@ -57,13 +57,15 @@ public class HomePage extends AppCompatActivity {
                 if (task.isSuccessful()) {
 
                     Map<String, Object> map = task.getResult().getData();
-                    for (Map.Entry<String, Object> entry : map.entrySet()) {
-                        list.add(entry.getKey());
 
+                    if(map != null){
+                        for (Map.Entry<String, Object> entry : map.entrySet()) {
+                            list.add(entry.getKey());
 
-                        Log.d("TAG", entry.getKey());
+                            Log.d("TAG", entry.getKey());
+                        }
+                        //Do what you want to do with your list
                     }
-                    //Do what you want to do with your list
                 }else{
                     System.out.println("Task was unsuccessful");
                 }
@@ -72,9 +74,6 @@ public class HomePage extends AppCompatActivity {
                 setupView(stockArr);
             }
         });
-
-
-
 
         addUser = (ImageButton) findViewById(R.id.addUserButton);
         //addUser.findViewById(R.id.addUserButton);

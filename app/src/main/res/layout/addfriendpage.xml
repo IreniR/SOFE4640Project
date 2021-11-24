@@ -5,41 +5,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <EditText
+        android:id="@+id/friendEmail"
+        android:layout_width="348dp"
+        android:layout_height="41dp"
         android:layout_marginStart="39dp"
-        android:layout_marginTop="38dp"
-        android:layout_marginEnd="222dp"
-        android:text="Enter your friend's email"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="96dp"
+        android:backgroundTint="#00FFFFFF"
+        android:ems="10"
+        android:hint="@string/enterFriendsEmailDesc"
+        android:inputType="textEmailAddress"
+        android:textAlignment="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/friendEmail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="39dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="162dp"
-        android:ems="10"
-        android:inputType="textEmailAddress"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
-    <Button
+    <ImageButton
         android:id="@+id/veriFriendButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="41dp"
-        android:layout_marginTop="25dp"
-        android:layout_marginEnd="282dp"
-        android:text="Add"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="344dp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#00FFFFFF"
+        android:src="@drawable/ic_add"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/friendEmail" />
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
