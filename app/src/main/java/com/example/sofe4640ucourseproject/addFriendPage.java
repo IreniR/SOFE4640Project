@@ -65,7 +65,9 @@ public class addFriendPage extends AppCompatActivity {
                                 startActivity(new Intent(addFriendPage.this,HomePage.class));
                             }
                         }
+
                     }
+
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {

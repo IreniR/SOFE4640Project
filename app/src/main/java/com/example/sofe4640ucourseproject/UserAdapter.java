@@ -12,11 +12,16 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.MyViewHolder> {
     Context context;
     String names[];
     String description[];
     int[] images;
+    private FirebaseAuth mAuth;
     public UserAdapter(Context ct, String s1[], String[] s2, int[] img){
         context = ct;
         names = s1;
@@ -44,10 +49,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.MyViewHolder> 
         holder.mainLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                mAuth = FirebaseAuth.getInstance();
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+
                 Intent intent = new Intent(context, ChatPage.class);
-                intent.putExtra("name",nam);
+                intent.putExtra("receiver",nam);
                 intent.putExtra("description", dis);
                 intent.putExtra("myImage", im);
+                intent.putExtra("sender",currentUser.getEmail());
                 context.startActivity(intent);
             }
         });
