@@ -64,7 +64,6 @@ public class HomePage extends AppCompatActivity {
 
                             Log.d("TAG", entry.getKey());
                         }
-                        //Do what you want to do with your list
                     }
                 }else{
                     System.out.println("Task was unsuccessful");

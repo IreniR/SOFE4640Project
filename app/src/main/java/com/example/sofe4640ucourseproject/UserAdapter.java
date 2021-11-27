@@ -17,17 +17,20 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.MyViewHolder> {
+
     Context context;
     String names[];
     String description[];
     int[] images;
     private FirebaseAuth mAuth;
+
     public UserAdapter(Context ct, String s1[], String[] s2, int[] img){
         context = ct;
         names = s1;
         description = s2;
         images = img;
     }
+
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
