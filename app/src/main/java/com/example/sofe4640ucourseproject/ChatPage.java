@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class ChatPage extends AppCompatActivity {
 
@@ -29,12 +31,13 @@ public class ChatPage extends AppCompatActivity {
     int image;
     TextView receiverName;
     Button back;
+
+    UUID hash = UUID.randomUUID();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_page);
-
-
 
         receiverName=findViewById(R.id.receiverText);
         back=findViewById(R.id.backButton);
@@ -55,8 +58,10 @@ public class ChatPage extends AppCompatActivity {
         message.put("message","Hello World!");
         message.put("audio","Sample audio");
         message.put("image","sample image");
+        message.put("receiver", name);
+        message.put("sender", FirebaseAuth.getInstance().getCurrentUser().getEmail());
 
-        messageRec.put(name,message);
+        messageRec.put(hash.toString(), message);
 
         FirebaseFirestore col = FirebaseFirestore.getInstance();
         col.collection("Messages").document(sender).set(messageRec, SetOptions.merge());
