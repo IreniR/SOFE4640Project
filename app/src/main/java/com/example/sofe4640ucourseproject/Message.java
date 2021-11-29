@@ -1,17 +1,14 @@
 package com.example.sofe4640ucourseproject;
 
-import java.io.Serializable;
-
-public class Message implements Serializable {
-    String message,senderId, type, timestamp;
+public class Message {
+    String message,senderId, timestamp;
 
     public Message(){}
 
-    public Message( String message, String sender, String timestamp, String type){
+    public Message(String message, String sender, String timestamp){
         this.message = message;
         this.senderId = sender;
         this.timestamp = timestamp;
-        this.type = type;
     }
 
     public String getMessage() {
@@ -28,14 +25,6 @@ public class Message implements Serializable {
 
     public void setSenderId(String senderId) {
         this.senderId = senderId;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getTimestamp() {
