@@ -22,8 +22,8 @@ public class MessageAdapter extends RecyclerView.Adapter{
 
     ArrayList<Message> chatMessagesArrayList;
 
-    private static final int SENT = 0;
-    private static final int RECEIVE = 1;
+    private static final int SENT = 1;
+    private static final int RECEIVE = 2;
 
     public MessageAdapter(Context context, ArrayList<Message> chatMessages){
         this.context = context;
@@ -49,33 +49,31 @@ public class MessageAdapter extends RecyclerView.Adapter{
         return null;
     }
 
-    //maybe this isn't right... doesnt go to here
+    public void update(ArrayList<Message> messages){
+        chatMessagesArrayList.clear();
+        chatMessagesArrayList.addAll(messages);
+        notifyDataSetChanged();
+    }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
         Message messages = chatMessagesArrayList.get(position);
 
-//        switch (holder.getItemViewType()){
-//            case SENT:
-//                ((SenderMessageHolder) holder).bind(messages);
-//            case RECEIVE:
-//                ((ReceiverMessageHolder) holder).bind(messages);
-//        }
         if(holder.getClass() == SenderMessageHolder.class){
             SenderMessageHolder viewHolder = (SenderMessageHolder)holder;
             viewHolder.textMessageDescription.setText(messages.getMessage());
-            Toast.makeText(context, messages.getMessage(), Toast.LENGTH_SHORT).show();
-        } else{
+        } else if(holder.getClass() == ReceiverMessageHolder.class){
             ReceiverMessageHolder viewHolder = (ReceiverMessageHolder)holder;
             viewHolder.textMessageDescription.setText(messages.getMessage());
+            Toast.makeText(context, messages.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     public int getItemViewType(int position){
         Message message = chatMessagesArrayList.get(position);
-        if(FirebaseAuth.getInstance().getCurrentUser().getUid().equals(message.getSenderId())){
-            //when current user is sender
+        if(FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(message.getSenderId())){
             return SENT;
         }else{
             return RECEIVE;
@@ -96,9 +94,6 @@ public class MessageAdapter extends RecyclerView.Adapter{
 
             textMessageDescription = itemView.findViewById(R.id.sent_message_view);
         }
-        void bind(Message message){
-            textMessageDescription.setText(message.getMessage());
-        }
     }
 
     class ReceiverMessageHolder extends RecyclerView.ViewHolder {
@@ -109,9 +104,6 @@ public class MessageAdapter extends RecyclerView.Adapter{
             super(itemView);
 
             textMessageDescription = itemView.findViewById(R.id.receive_message_view);
-        }
-        void bind(Message message){
-            textMessageDescription.setText(message.getMessage());
         }
     }
 }

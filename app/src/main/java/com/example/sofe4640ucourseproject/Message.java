@@ -5,7 +5,7 @@ public class Message {
 
     public Message(){}
 
-    public Message(String message, String sender, String timestamp){
+    public Message(String message, String sender){
         this.message = message;
         this.senderId = sender;
         this.timestamp = timestamp;

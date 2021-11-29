@@ -77,8 +77,6 @@ public class ChatPage extends AppCompatActivity {
         getData();
 
         messageAdapter.notifyDataSetChanged();
-        messageAdapter.notifyItemInserted(chatList.toArray().length - 1);
-
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,7 +105,12 @@ public class ChatPage extends AppCompatActivity {
     }
 
     private void setChatHistory() {
-        FirebaseFirestore.getInstance().collection("Messages").document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        setChatHistorySent();
+        //  setChatHistoryReceive(); // show it as receiver but shown as sender
+    }
+
+    private void setChatHistoryReceive() {
+        FirebaseFirestore.getInstance().collection("Messages").document(name.toString()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
@@ -125,11 +128,46 @@ public class ChatPage extends AppCompatActivity {
                             try {
                                 jsonObject = new JSONObject(json);
 
-                                if (jsonObject.get("receiver").equals(name)) {
-                                    newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail(), jsonObject.get("timestamp").toString());
+                                if (jsonObject.get("receiver").equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                                    newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail());
                                     chatList.add(newMessage);
-                                 //   messageAdapter.notifyItemInserted(chatList.toArray().length - 1);
-                                    chatMessagesDisplay.invalidate();
+                                    messageAdapter = new MessageAdapter(ChatPage.this, chatList);
+                                    chatMessagesDisplay.setAdapter(messageAdapter);
+                                    messageAdapter.notifyDataSetChanged();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        messageAdapter.notifyDataSetChanged();
+    }
+
+    private void setChatHistorySent() {
+        FirebaseFirestore.getInstance().collection("Messages").document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                chatList = new ArrayList<>();
+
+                if (task.isSuccessful()) {
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    if (documentSnapshot.exists()) {
+                        Map<String, Object> friendsMap = documentSnapshot.getData();
+                        for (Object value : friendsMap.values()) {
+                            Gson gson = new Gson();
+                            String json = gson.toJson(value);
+                            JSONObject jsonObject;
+                            try {
+                                jsonObject = new JSONObject(json);
+
+                                if (jsonObject.get("receiver").equals(name)) {
+                                    newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                                    chatList.add(newMessage);
+                                    messageAdapter.update(chatList);
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -137,7 +175,6 @@ public class ChatPage extends AppCompatActivity {
                         }
                         //TODO order the timestamps
 
-                        //order list by timestamp
                         System.out.println(chatList);
                         messageAdapter = new MessageAdapter(ChatPage.this, chatList);
                         chatMessagesDisplay.setAdapter(messageAdapter);
