@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -45,7 +46,6 @@ public class ChatPage extends AppCompatActivity {
     ArrayList<Message> chatList;
     Message newMessage;
 
-    UUID hash = UUID.randomUUID();
     FirebaseFirestore db;
 
     @Override
@@ -72,9 +72,8 @@ public class ChatPage extends AppCompatActivity {
 
         messageAdapter = new MessageAdapter(getApplicationContext(), chatList);
         chatMessagesDisplay.setAdapter(messageAdapter);
-
-        setChatHistory();
         getData();
+        setChatHistory();
 
         messageAdapter.notifyDataSetChanged();
 
@@ -106,11 +105,12 @@ public class ChatPage extends AppCompatActivity {
 
     private void setChatHistory() {
         setChatHistorySent();
-        //  setChatHistoryReceive(); // show it as receiver but shown as sender
+          setChatHistoryReceive(); // show it as receiver but shown as sender
     }
 
     private void setChatHistoryReceive() {
-        FirebaseFirestore.getInstance().collection("Messages").document(name.toString()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+
+        FirebaseFirestore.getInstance().collection("Messages").document(name).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
@@ -134,6 +134,7 @@ public class ChatPage extends AppCompatActivity {
                                     messageAdapter = new MessageAdapter(ChatPage.this, chatList);
                                     chatMessagesDisplay.setAdapter(messageAdapter);
                                     messageAdapter.notifyDataSetChanged();
+                                    System.out.println("It gets the senders email");
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -144,6 +145,8 @@ public class ChatPage extends AppCompatActivity {
             }
         });
         messageAdapter.notifyDataSetChanged();
+
+
     }
 
     private void setChatHistorySent() {
@@ -189,7 +192,7 @@ public class ChatPage extends AppCompatActivity {
     private void setMessageDetails() {
         Map<String, Object> messageRec = new HashMap<>();
         Map<String, Object> message = new HashMap<>();
-
+        UUID hash = UUID.randomUUID();
         message.put("message", textDesc.getText().toString());
         message.put("audio", "Sample audio");
         message.put("image", "sample image");
