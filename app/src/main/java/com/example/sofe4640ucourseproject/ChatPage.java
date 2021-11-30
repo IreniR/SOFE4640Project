@@ -144,7 +144,7 @@ public class ChatPage extends AppCompatActivity {
 
                                 if (jsonObject.get("receiver").equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
                                     try {
-                                        newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail(), dateFormat.parse(jsonObject.get("timestamp").toString()));
+                                        newMessage = new Message(jsonObject.get("message").toString(), jsonObject.get("sender").toString(), dateFormat.parse(jsonObject.get("timestamp").toString()));
                                     } catch (ParseException e) {
                                         e.printStackTrace();
                                     }
