@@ -1,13 +1,17 @@
 package com.example.sofe4640ucourseproject;
 
+import java.util.Date;
+
 public class Message {
     String message,senderId;
-    int timestamp;
+    Date timestamp;
+
     public Message(){}
 
-    public Message(String message, String sender){
+    public Message(String message, String sender, Date timestamp){
         this.message = message;
         this.senderId = sender;
+        this.timestamp = timestamp;
     }
 
     public String getMessage() {
@@ -26,11 +30,11 @@ public class Message {
         this.senderId = senderId;
     }
 
-    public int getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(int timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 }
