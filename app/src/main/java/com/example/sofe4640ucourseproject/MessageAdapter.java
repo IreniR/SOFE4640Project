@@ -51,7 +51,7 @@ public class MessageAdapter extends RecyclerView.Adapter{
 
     public void update(ArrayList<Message> messages){
         chatMessagesArrayList.clear();
-        chatMessagesArrayList.addAll(messages);
+        chatMessagesArrayList = messages;
         notifyDataSetChanged();
     }
 
@@ -66,13 +66,15 @@ public class MessageAdapter extends RecyclerView.Adapter{
         } else if(holder.getClass() == ReceiverMessageHolder.class){
             ReceiverMessageHolder viewHolder = (ReceiverMessageHolder)holder;
             viewHolder.textMessageDescription.setText(messages.getMessage());
-            Toast.makeText(context, messages.getMessage(), Toast.LENGTH_SHORT).show();
+
         }
     }
 
     @Override
     public int getItemViewType(int position){
+
         Message message = chatMessagesArrayList.get(position);
+//        Toast.makeText(context, position+" :" +message.getSenderId(), Toast.LENGTH_SHORT).show();
         if(FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(message.getSenderId())){
             return SENT;
         }else{

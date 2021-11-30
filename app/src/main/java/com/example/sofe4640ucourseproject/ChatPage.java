@@ -44,6 +44,8 @@ public class ChatPage extends AppCompatActivity {
     RecyclerView chatMessagesDisplay;
     MessageAdapter messageAdapter;
     ArrayList<Message> chatList;
+    ArrayList<Message> sent_messages_List;
+    ArrayList<Message> receive_message_List;
     Message newMessage;
 
     FirebaseFirestore db;
@@ -74,6 +76,7 @@ public class ChatPage extends AppCompatActivity {
         chatMessagesDisplay.setAdapter(messageAdapter);
         getData();
         setChatHistory();
+        chatList = new ArrayList<>();
 
         messageAdapter.notifyDataSetChanged();
 
@@ -104,8 +107,9 @@ public class ChatPage extends AppCompatActivity {
     }
 
     private void setChatHistory() {
+
+        setChatHistoryReceive(); // show it as receiver but shown as sender
         setChatHistorySent();
-          setChatHistoryReceive(); // show it as receiver but shown as sender
     }
 
     private void setChatHistoryReceive() {
@@ -114,7 +118,8 @@ public class ChatPage extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
-                chatList = new ArrayList<>();
+
+                receive_message_List = new ArrayList<>();
 
                 if (task.isSuccessful()) {
                     DocumentSnapshot documentSnapshot = task.getResult();
@@ -129,17 +134,23 @@ public class ChatPage extends AppCompatActivity {
                                 jsonObject = new JSONObject(json);
 
                                 if (jsonObject.get("receiver").equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
-                                    newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail());
-                                    chatList.add(newMessage);
+                                    newMessage = new Message(jsonObject.get("message").toString(), jsonObject.get("sender").toString());
+
+
+                                    receive_message_List.add(newMessage);
+                                    chatList.addAll(receive_message_List);
+
                                     messageAdapter = new MessageAdapter(ChatPage.this, chatList);
                                     chatMessagesDisplay.setAdapter(messageAdapter);
                                     messageAdapter.notifyDataSetChanged();
                                     System.out.println("It gets the senders email");
+
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
+
                     }
                 }
             }
@@ -154,8 +165,7 @@ public class ChatPage extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
-                chatList = new ArrayList<>();
-
+                sent_messages_List = new ArrayList<>();
                 if (task.isSuccessful()) {
                     DocumentSnapshot documentSnapshot = task.getResult();
                     if (documentSnapshot.exists()) {
@@ -168,9 +178,12 @@ public class ChatPage extends AppCompatActivity {
                                 jsonObject = new JSONObject(json);
 
                                 if (jsonObject.get("receiver").equals(name)) {
+
                                     newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail());
-                                    chatList.add(newMessage);
-                                    messageAdapter.update(chatList);
+                                    sent_messages_List.add(newMessage);
+
+
+
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -178,6 +191,9 @@ public class ChatPage extends AppCompatActivity {
                         }
                         //TODO order the timestamps
 
+                        chatList.clear();
+                        chatList.addAll(receive_message_List);
+                        chatList.addAll(sent_messages_List);
                         System.out.println(chatList);
                         messageAdapter = new MessageAdapter(ChatPage.this, chatList);
                         chatMessagesDisplay.setAdapter(messageAdapter);
@@ -186,6 +202,7 @@ public class ChatPage extends AppCompatActivity {
                 }
             }
         });
+
         messageAdapter.notifyDataSetChanged();
     }
 
