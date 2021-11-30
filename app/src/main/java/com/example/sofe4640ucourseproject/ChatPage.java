@@ -22,7 +22,14 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -49,6 +56,8 @@ public class ChatPage extends AppCompatActivity {
     Message newMessage;
 
     FirebaseFirestore db;
+
+    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +143,11 @@ public class ChatPage extends AppCompatActivity {
                                 jsonObject = new JSONObject(json);
 
                                 if (jsonObject.get("receiver").equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
-                                    newMessage = new Message(jsonObject.get("message").toString(), jsonObject.get("sender").toString());
+                                    try {
+                                        newMessage = new Message(jsonObject.get("message").toString(), jsonObject.get("sender").toString(), dateFormat.parse(jsonObject.get("timestamp").toString()));
+                                    } catch (ParseException e) {
+                                        e.printStackTrace();
+                                    }
 
 
                                     receive_message_List.add(newMessage);
@@ -179,21 +192,21 @@ public class ChatPage extends AppCompatActivity {
 
                                 if (jsonObject.get("receiver").equals(name)) {
 
-                                    newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                                    try {
+                                        newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail(), dateFormat.parse(jsonObject.get("timestamp").toString()));
+                                    } catch (ParseException e) {
+                                        e.printStackTrace();
+                                    }
                                     sent_messages_List.add(newMessage);
-
-
-
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
-                        //TODO order the timestamps
-
                         chatList.clear();
                         chatList.addAll(receive_message_List);
                         chatList.addAll(sent_messages_List);
+                        Collections.sort(chatList, Comparator.comparing(Message::getTimestamp));
                         System.out.println(chatList);
                         messageAdapter = new MessageAdapter(ChatPage.this, chatList);
                         chatMessagesDisplay.setAdapter(messageAdapter);
@@ -215,7 +228,8 @@ public class ChatPage extends AppCompatActivity {
         message.put("image", "sample image");
         message.put("receiver", name);
         message.put("sender", FirebaseAuth.getInstance().getCurrentUser().getEmail());
-        message.put("timestamp", FieldValue.serverTimestamp());
+        Calendar cal = Calendar.getInstance();
+        message.put("timestamp", dateFormat.format(cal.getTime()));
 
         messageRec.put(hash.toString(), message);
         db.collection("Messages").document(sender).set(messageRec, SetOptions.merge());
