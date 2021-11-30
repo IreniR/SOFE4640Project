@@ -6,11 +6,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,7 +21,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
@@ -29,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -39,14 +40,13 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ChatPage extends AppCompatActivity {
+public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
-    String name, description, sender;
-    int image;
+    String name, description, sender, image;
     TextView receiverName;
 
     EditText textDesc;
-    ImageButton send_message_btn, back;
+    ImageButton send_message_btn, back, menu_btn;
 
     RecyclerView chatMessagesDisplay;
     MessageAdapter messageAdapter;
@@ -58,6 +58,8 @@ public class ChatPage extends AppCompatActivity {
     FirebaseFirestore db;
 
     DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    private static final int PICK_IMAGE = 1;
+    Uri imageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +72,11 @@ public class ChatPage extends AppCompatActivity {
         back = findViewById(R.id.backButton);
         textDesc = findViewById(R.id.messageBox);
         send_message_btn = findViewById(R.id.send_msg_btn);
+
+        menu_btn = findViewById(R.id.menu_btn);
+        final PopupMenu popupMenu = new PopupMenu(
+                this, menu_btn
+        );
 
         chatList = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
@@ -86,6 +93,21 @@ public class ChatPage extends AppCompatActivity {
         getData();
         setChatHistory();
         chatList = new ArrayList<>();
+
+        popupMenu.getMenuInflater().inflate(R.menu.menu, popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                int id = menuItem.getItemId();
+                if(id == R.id.show_audio){
+                    setAudio();
+                }else if(id == R.id.show_gallery){
+                    setImage();
+                }else if(id == R.id.show_location){
+                    setLocation();
+                }return false;
+            }
+        });
 
         messageAdapter.notifyDataSetChanged();
 
@@ -113,6 +135,33 @@ public class ChatPage extends AppCompatActivity {
             }
         });
 
+        menu_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showPopup(view);
+            }
+        });
+    }
+
+    public void showPopup(View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.menu, popup.getMenu());
+        popup.show();
+    }
+
+    private void setAudio() {
+    }
+
+    private void setLocation() {
+    }
+
+    private void setImage() {
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        return false;
     }
 
     private void setChatHistory() {
@@ -163,14 +212,11 @@ public class ChatPage extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         }
-
                     }
                 }
             }
         });
         messageAdapter.notifyDataSetChanged();
-
-
     }
 
     private void setChatHistorySent() {
@@ -241,7 +287,7 @@ public class ChatPage extends AppCompatActivity {
         if (getIntent().hasExtra("myImage") && getIntent().hasExtra("description") && getIntent().hasExtra("receiver")) {
             name = getIntent().getStringExtra("receiver");
             description = getIntent().getStringExtra("description");
-            image = getIntent().getIntExtra("myImage", 1);
+            image = getIntent().getStringExtra("myImage");
             sender = getIntent().getStringExtra("sender");
         } else {
             Toast.makeText(this, "No data", Toast.LENGTH_SHORT).show();
@@ -259,5 +305,6 @@ public class ChatPage extends AppCompatActivity {
         super.onStop();
         messageAdapter.notifyDataSetChanged();
     }
+
 
 }

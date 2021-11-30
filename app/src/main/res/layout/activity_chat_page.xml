@@ -5,37 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ChatPage">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:weightSum="100"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/LinearLayoutView"
-        android:orientation="horizontal"
-        android:layout_marginBottom="5dp"
-    >
 
-        <EditText
-            android:id="@+id/messageBox"
-            android:layout_width="337dp"
-            android:layout_height="50dp"
-            android:layout_marginLeft="15dp"
-            android:layout_weight="1"
-            android:background="@drawable/message_box_background"
-            android:ems="10"
-            android:hint="type a message..."
-            android:inputType="textShortMessage"
-            android:paddingLeft="10dp" />
-
-        <ImageButton
-            android:id="@+id/send_msg_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:backgroundTint="#00FFFFFF"
-            app:srcCompat="@android:drawable/ic_menu_send" />
-
-    </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -74,14 +44,53 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chatRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="594dp"
-        android:layout_above="@+id/LinearLayoutView"
+        android:layout_height="588dp"
+        android:layout_above="@+id/messageBox"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="0dp"
         android:layout_marginTop="41dp"
         android:layout_marginEnd="0dp"
-        android:layout_marginBottom="18dp" />
+        android:layout_marginBottom="12dp" />
 
+    <EditText
+        android:id="@+id/messageBox"
+        android:layout_width="289dp"
+        android:layout_height="49dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="6dp"
+        android:layout_marginBottom="22dp"
+        android:layout_toStartOf="@+id/send_msg_btn"
+        android:layout_weight="1"
+        android:background="@drawable/message_box_background"
+        android:ems="10"
+        android:hint="type a message..."
+        android:inputType="textShortMessage"
+        android:paddingLeft="10dp" />
+
+    <ImageButton
+        android:id="@+id/send_msg_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="7dp"
+        android:layout_marginBottom="23dp"
+        android:layout_weight="1"
+        android:backgroundTint="#00FFFFFF"
+        app:srcCompat="@android:drawable/ic_menu_send" />
+
+    <ImageButton
+        android:id="@+id/menu_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="24dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginBottom="33dp"
+        android:layout_toStartOf="@+id/messageBox"
+        android:layout_weight="1"
+        android:backgroundTint="#00FFFFFF"
+        android:src="@drawable/ic_menu" />
 
 </RelativeLayout>

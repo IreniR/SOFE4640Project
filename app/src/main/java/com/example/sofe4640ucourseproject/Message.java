@@ -3,15 +3,24 @@ package com.example.sofe4640ucourseproject;
 import java.util.Date;
 
 public class Message {
-    String message,senderId;
+    String message,senderId, urlImage;
     Date timestamp;
 
     public Message(){}
 
-    public Message(String message, String sender, Date timestamp){
+    public Message(String message, String sender, Date timestamp){//{,String urlImage){
         this.message = message;
         this.senderId = sender;
         this.timestamp = timestamp;
+        this.urlImage = urlImage;
+    }
+
+    public String getUrlImage() {
+        return urlImage;
+    }
+
+    public void setUrlImage(String urlImage) {
+        this.urlImage = urlImage;
     }
 
     public String getMessage() {

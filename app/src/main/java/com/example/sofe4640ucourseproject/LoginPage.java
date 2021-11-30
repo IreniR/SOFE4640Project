@@ -197,8 +197,14 @@ public class LoginPage extends AppCompatActivity implements View.OnClickListener
     public boolean onTouchEvent(MotionEvent event) {
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.
                 INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-        return true;
+
+        View focusedView = getCurrentFocus();
+        if(focusedView != null){
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            return true;
+        }else{
+            return false;
+        }
     }
 }
 
