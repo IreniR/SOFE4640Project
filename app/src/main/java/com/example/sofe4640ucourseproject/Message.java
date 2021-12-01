@@ -5,14 +5,16 @@ import java.util.Date;
 public class Message {
     String message,senderId, urlImage;
     Date timestamp;
+    Boolean location;
 
     public Message(){}
 
-    public Message(String message, String sender, Date timestamp){//{,String urlImage){
+    public Message(String message, String sender, Date timestamp, Boolean location){//{,String urlImage){
         this.message = message;
         this.senderId = sender;
         this.timestamp = timestamp;
         this.urlImage = urlImage;
+        this.location = location;
     }
 
     public String getUrlImage() {
