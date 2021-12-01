@@ -1,6 +1,7 @@
 package com.example.sofe4640ucourseproject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -9,20 +10,26 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -32,13 +39,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.storage.FirebaseStorage;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -52,6 +71,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -73,12 +94,15 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
     Message newMessage;
 
     FirebaseFirestore db;
+    FirebaseStorage storage;
 
+    private Uri filePath;
     LocationManager locationManager;
 
     DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     private static final int PICK_IMAGE = 1;
     Uri imageUri;
+    Uri videoUri;
 
     public static final int REQUEST_CODE_LOCATION_PERMISSION = 1;
 
@@ -126,9 +150,9 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                     public boolean onMenuItemClick(MenuItem menuItem) {
                         int id = menuItem.getItemId();
                         if (id == R.id.show_audio) {
-                            setAudio();
+                            storeVideo();
                         } else if (id == R.id.show_gallery) {
-                            setImage();
+                            getVideo();
                         } else if (id == R.id.show_location) {
                             requestLocationPermission();
                         } else {
@@ -168,6 +192,86 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                 }
             }
         });
+    }
+
+    public void getVideo() {
+        StorageReference videoRef = FirebaseStorage.getInstance().getReference("Files/" + "1638331972852.mp4");
+
+        final long ONE_MEGABYTE = 1024 * 1024;
+        videoRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                FileOutputStream fos = null;
+                try {
+                    fos = openFileOutput("test.mp4", Context.MODE_PRIVATE);
+                    fos.write(bytes);
+                    fos.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Toast.makeText(ChatPage.this, "Uploaded file", Toast.LENGTH_SHORT).show();
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+            }
+        });
+    }
+
+
+    public void storeVideo() {
+        Intent intent = new Intent();
+        intent.setType("video/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, 5);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 5 && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            videoUri = data.getData();
+            System.out.println("Uploading");
+            uploadvideo();
+        }
+    }
+
+    private String getfiletype(Uri videouri) {
+        ContentResolver r = getContentResolver();
+        // get the file type ,in this case its mp4
+        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+        return mimeTypeMap.getExtensionFromMimeType(r.getType(videouri));
+    }
+
+    private void uploadvideo() {
+        System.out.println(videoUri);
+        if (videoUri != null) {
+            // save the selected video in Firebase storage
+            final StorageReference reference = FirebaseStorage.getInstance().getReference("Files/" + System.currentTimeMillis() + "." + getfiletype(videoUri));
+            reference.putFile(videoUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                    while (!uriTask.isSuccessful()) ;
+                    // get the link of video
+                    String downloadUri = uriTask.getResult().toString();
+                    DatabaseReference reference1 = FirebaseDatabase.getInstance().getReference("Video");
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("videolink", downloadUri);
+                    reference1.child("" + System.currentTimeMillis()).setValue(map);
+                    // Video uploaded successfully
+                    // Dismiss dialog
+                    Toast.makeText(ChatPage.this, "Video Uploaded!!", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    // Error, Image not uploaded
+                    Toast.makeText(ChatPage.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     public void requestLocationPermission() {
