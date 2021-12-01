@@ -23,6 +23,7 @@ import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -37,6 +38,7 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -65,11 +67,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -82,9 +86,10 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
 
     String name, description, sender, image;
     TextView receiverName;
-
+    Date timeStamp;
     EditText textDesc;
     ImageButton send_message_btn, back, menu_btn;
+    VideoView videoViewer;
 
     RecyclerView chatMessagesDisplay;
     MessageAdapter messageAdapter;
@@ -97,6 +102,7 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
     FirebaseStorage storage;
 
     private Uri filePath;
+    private Uri videoLink;
     LocationManager locationManager;
 
     DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -195,7 +201,26 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
     }
 
     public void getVideo() {
-        StorageReference videoRef = FirebaseStorage.getInstance().getReference("Files/" + "1638331972852.mp4");
+        StorageReference videoRef = FirebaseStorage.getInstance().getReference("Files/"+timeStamp+".mp4");
+        videoRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
+        {
+            @Override
+            public void onSuccess(Uri downloadUrl)
+            {
+                System.out.println("Link is "+downloadUrl.toString());
+                videoLink=downloadUrl;
+
+                setVideoMessageDetails(videoLink.toString());
+                textDesc.getText().clear();
+                setChatHistory();
+                Toast.makeText(ChatPage.this, "Message Sent", Toast.LENGTH_SHORT).show();
+
+                Intent video = new Intent(ChatPage.this, com.example.sofe4640ucourseproject.VideoView.class);
+                video.putExtra("video",videoLink.toString());
+                //startActivity(video);
+
+            }
+        });
 
         final long ONE_MEGABYTE = 1024 * 1024;
         videoRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
@@ -203,19 +228,23 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
             public void onSuccess(byte[] bytes) {
                 FileOutputStream fos = null;
                 try {
-                    fos = openFileOutput("test.mp4", Context.MODE_PRIVATE);
+                    fos = openFileOutput(timeStamp+".mp4", Context.MODE_PRIVATE);
+                    //fos = new FileOutputStream(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), timeStamp+".mp4"));
                     fos.write(bytes);
                     fos.close();
+                    Toast.makeText(ChatPage.this, "Uploaded file", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    Toast.makeText(ChatPage.this, "Download Failed!", Toast.LENGTH_SHORT).show();
                 }
-                Toast.makeText(ChatPage.this, "Uploaded file", Toast.LENGTH_SHORT).show();
+
 
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 // Handle any errors
+                Log.d("Download Failed!", "onFailure: File wasn't downloaded to the downloads folder ");
             }
         });
     }
@@ -245,10 +274,12 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
     }
 
     private void uploadvideo() {
-        System.out.println(videoUri);
+        System.out.println("videouri is: "+videoUri);
         if (videoUri != null) {
             // save the selected video in Firebase storage
-            final StorageReference reference = FirebaseStorage.getInstance().getReference("Files/" + System.currentTimeMillis() + "." + getfiletype(videoUri));
+            Long timeStampRaw= System.currentTimeMillis()/1000;
+            timeStamp = Calendar.getInstance().getTime();
+            final StorageReference reference = FirebaseStorage.getInstance().getReference("Files/" + timeStamp + "." + getfiletype(videoUri));
             reference.putFile(videoUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -263,6 +294,7 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                     // Video uploaded successfully
                     // Dismiss dialog
                     Toast.makeText(ChatPage.this, "Video Uploaded!!", Toast.LENGTH_SHORT).show();
+                    getVideo();
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -384,7 +416,10 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                             mapIntent.setPackage("com.google.android.apps.maps");
                             startActivity(mapIntent);
+                        }else if(m.getMessage()=="Video Message"){
+                            System.out.println("The message is "+m.getMessage());
                         }
+                        System.out.println(m.getMessage()+" clicked message");
                     }
                 })
         );
@@ -453,6 +488,7 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
         messageAdapter.notifyDataSetChanged();
     }
 
+
     private void getData() {
         if (getIntent().hasExtra("myImage") && getIntent().hasExtra("description") && getIntent().hasExtra("receiver")) {
             name = getIntent().getStringExtra("receiver");
@@ -517,5 +553,23 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
         db.collection("Messages").document(sender).set(messageRec, SetOptions.merge());
         messageAdapter.notifyDataSetChanged();
         setChatHistory();
+    }
+
+    private void setVideoMessageDetails(String Url) {
+        Map<String, Object> messageRec = new HashMap<>();
+        Map<String, Object> message = new HashMap<>();
+        UUID hash = UUID.randomUUID();
+        message.put("message", "Video Message");
+        message.put("audio", "Sample audio");
+        message.put("image", Url);
+        message.put("receiver", name);
+        message.put("location", false);
+        message.put("sender", FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        Calendar cal = Calendar.getInstance();
+        message.put("timestamp", dateFormat.format(cal.getTime()));
+
+        messageRec.put(hash.toString(), message);
+        db.collection("Messages").document(sender).set(messageRec, SetOptions.merge());
+        messageAdapter.notifyDataSetChanged();
     }
 }
