@@ -21,15 +21,9 @@ public class VideoView extends AppCompatActivity {
         videoViewer=findViewById(R.id.videoView3);
         videoViewer.setVideoPath(extras.getString("video"));
         videoViewer.start();
+    }
 
-
-        backButton=findViewById(R.id.backButton);
-        backButton.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                startActivity(new Intent(VideoView.this,ChatPage.class));
-            }
-        });
+    public void back(View v) {
+        startActivity(new Intent(VideoView.this,HomePage.class));
     }
 }
