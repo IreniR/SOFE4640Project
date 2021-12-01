@@ -23,6 +23,7 @@ import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -149,10 +150,8 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
                         int id = menuItem.getItemId();
-                        if (id == R.id.show_audio) {
+                        if (id == R.id.audio_video) {
                             storeVideo();
-                        } else if (id == R.id.show_gallery) {
-                            getVideo();
                         } else if (id == R.id.show_location) {
                             requestLocationPermission();
                         } else {
@@ -203,7 +202,9 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
             public void onSuccess(byte[] bytes) {
                 FileOutputStream fos = null;
                 try {
-                    fos = openFileOutput("test.mp4", Context.MODE_PRIVATE);
+                    fos = new FileOutputStream(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                            "test.mp4"));
+//                    fos = openFileOutput(String.valueOf(Environment.getExternalStorageDirectory()), Context.MODE_PRIVATE);
                     fos.write(bytes);
                     fos.close();
                 } catch (Exception e) {
@@ -219,7 +220,6 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
             }
         });
     }
-
 
     public void storeVideo() {
         Intent intent = new Intent();
