@@ -155,10 +155,8 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
                         int id = menuItem.getItemId();
-                        if (id == R.id.show_audio) {
+                        if (id == R.id.show_media) {
                             storeVideo();
-                        } else if (id == R.id.show_gallery) {
-                            getVideo();
                         } else if (id == R.id.show_location) {
                             requestLocationPermission();
                         } else {
@@ -214,11 +212,6 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                 textDesc.getText().clear();
                 setChatHistory();
                 Toast.makeText(ChatPage.this, "Message Sent", Toast.LENGTH_SHORT).show();
-
-                Intent video = new Intent(ChatPage.this, com.example.sofe4640ucourseproject.VideoView.class);
-                video.putExtra("video",videoLink.toString());
-                //startActivity(video);
-
             }
         });
 
@@ -379,7 +372,7 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
 
                                 if (jsonObject.get("receiver").equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
                                     try {
-                                        newMessage = new Message(jsonObject.get("message").toString(), jsonObject.get("sender").toString(), dateFormat.parse(jsonObject.get("timestamp").toString()), jsonObject.get("location").toString());
+                                        newMessage = new Message(jsonObject.get("message").toString(), jsonObject.get("sender").toString(), dateFormat.parse(jsonObject.get("timestamp").toString()), jsonObject.get("location").toString(), jsonObject.get("image").toString());
                                     } catch (ParseException e) {
                                         e.printStackTrace();
                                     }
@@ -416,7 +409,10 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                             mapIntent.setPackage("com.google.android.apps.maps");
                             startActivity(mapIntent);
-                        }else if(m.getMessage()=="Video Message"){
+                        }else if(m.getMessage().toString().equals("Video Message")){
+                            Intent video = new Intent(ChatPage.this, com.example.sofe4640ucourseproject.VideoView.class);
+                            video.putExtra("video",m.getVideoPath());
+                            startActivity(video);
                             System.out.println("The message is "+m.getMessage());
                         }
                         System.out.println(m.getMessage()+" clicked message");
@@ -444,7 +440,7 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
 
                                 if (jsonObject.get("receiver").equals(name)) {
                                     try {
-                                        newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail(), dateFormat.parse(jsonObject.get("timestamp").toString()), jsonObject.get("location").toString());
+                                        newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail(), dateFormat.parse(jsonObject.get("timestamp").toString()), jsonObject.get("location").toString(), jsonObject.get("image").toString());
                                     } catch (ParseException e) {
                                         e.printStackTrace();
                                     }

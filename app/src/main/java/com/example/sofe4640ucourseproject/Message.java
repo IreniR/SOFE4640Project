@@ -6,10 +6,11 @@ public class Message {
     String message,senderId, urlImage;
     Date timestamp;
     boolean isLocation;
+    String videoPath;
 
     public Message(){}
 
-    public Message(String message, String sender, Date timestamp, String location){
+    public Message(String message, String sender, Date timestamp, String location, String videoPath){
         this.message = message;
         this.senderId = sender;
         this.timestamp = timestamp;
@@ -19,6 +20,7 @@ public class Message {
         } else {
             this.isLocation = false;
         }
+        this.videoPath = videoPath;
     }
 
     public String getUrlImage() {
@@ -55,5 +57,9 @@ public class Message {
 
     public boolean getLocationBoolaen() {
         return this.isLocation;
+    }
+
+    public String getVideoPath() {
+        return this.videoPath;
     }
 }
