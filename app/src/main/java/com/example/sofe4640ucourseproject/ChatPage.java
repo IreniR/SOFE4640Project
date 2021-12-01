@@ -2,17 +2,31 @@ package com.example.sofe4640ucourseproject;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +38,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,6 +47,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -40,7 +57,7 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
+public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener, LocationListener {
 
     String name, description, sender, image;
     TextView receiverName;
@@ -57,9 +74,13 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
 
     FirebaseFirestore db;
 
+    LocationManager locationManager;
+
     DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     private static final int PICK_IMAGE = 1;
     Uri imageUri;
+
+    public static final int REQUEST_CODE_LOCATION_PERMISSION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,19 +116,32 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
         chatList = new ArrayList<>();
 
         popupMenu.getMenuInflater().inflate(R.menu.menu, popupMenu.getMenu());
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+        menu_btn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                int id = menuItem.getItemId();
-                if(id == R.id.show_audio){
-                    setAudio();
-                }else if(id == R.id.show_gallery){
-                    setImage();
-                }else if(id == R.id.show_location){
-                    setLocation();
-                }return false;
+            public void onClick(View view) {
+                popupMenu.show();
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        int id = menuItem.getItemId();
+                        if (id == R.id.show_audio) {
+                            setAudio();
+                        } else if (id == R.id.show_gallery) {
+                            setImage();
+                        } else if (id == R.id.show_location) {
+                            requestLocationPermission();
+                        } else {
+                            return ChatPage.super.onOptionsItemSelected(menuItem);
+                        }
+                        return false;
+                    }
+                });
+
+                popupMenu.show();
             }
         });
+
 
         messageAdapter.notifyDataSetChanged();
 
@@ -134,13 +168,34 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                 }
             }
         });
+    }
 
-        menu_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showPopup(view);
+    public void requestLocationPermission() {
+        System.out.println("Location Permission");
+        if (ContextCompat.checkSelfPermission(
+                getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE_LOCATION_PERMISSION);
+        } else {
+            getLocation();
+        }
+    }
+
+    public void onRequestPermissionResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_LOCATION_PERMISSION && grantResults.length > 0) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getLocation();
+            } else {
+                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
             }
-        });
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    public void getLocation() {
+        locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5, this);
     }
 
     public void showPopup(View v) {
@@ -153,9 +208,6 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
     private void setAudio() {
     }
 
-    private void setLocation() {
-    }
-
     private void setImage() {
     }
 
@@ -165,7 +217,6 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
     }
 
     private void setChatHistory() {
-
         setChatHistoryReceive(); // show it as receiver but shown as sender
         setChatHistorySent();
     }
@@ -175,7 +226,6 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
         FirebaseFirestore.getInstance().collection("Messages").document(name).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-
 
                 receive_message_List = new ArrayList<>();
 
@@ -193,14 +243,13 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
 
                                 if (jsonObject.get("receiver").equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
                                     try {
-                                        newMessage = new Message(jsonObject.get("message").toString(), jsonObject.get("sender").toString(), dateFormat.parse(jsonObject.get("timestamp").toString()));
+                                        newMessage = new Message(jsonObject.get("message").toString(), jsonObject.get("sender").toString(), dateFormat.parse(jsonObject.get("timestamp").toString()), jsonObject.get("location").toString());
                                     } catch (ParseException e) {
                                         e.printStackTrace();
                                     }
 
 
                                     receive_message_List.add(newMessage);
-                                    chatList.addAll(receive_message_List);
 
                                     messageAdapter = new MessageAdapter(ChatPage.this, chatList);
                                     chatMessagesDisplay.setAdapter(messageAdapter);
@@ -212,11 +261,29 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                                 e.printStackTrace();
                             }
                         }
+
+                        chatList.addAll(receive_message_List);
                     }
                 }
             }
         });
         messageAdapter.notifyDataSetChanged();
+
+        chatMessagesDisplay.addOnItemTouchListener(
+                new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View v, int position) {
+                        Message m = chatList.get(position);
+                        System.out.println("Location: " + m.getLocationBoolaen());
+                        if (m.getLocationBoolaen()) {
+                            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + m.message);
+                            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                            mapIntent.setPackage("com.google.android.apps.maps");
+                            startActivity(mapIntent);
+                        }
+                    }
+                })
+        );
     }
 
     private void setChatHistorySent() {
@@ -237,9 +304,8 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                                 jsonObject = new JSONObject(json);
 
                                 if (jsonObject.get("receiver").equals(name)) {
-
                                     try {
-                                        newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail(), dateFormat.parse(jsonObject.get("timestamp").toString()));
+                                        newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail(), dateFormat.parse(jsonObject.get("timestamp").toString()), jsonObject.get("location").toString());
                                     } catch (ParseException e) {
                                         e.printStackTrace();
                                     }
@@ -273,6 +339,7 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
         message.put("audio", "Sample audio");
         message.put("image", "sample image");
         message.put("receiver", name);
+        message.put("location", false);
         message.put("sender", FirebaseAuth.getInstance().getCurrentUser().getEmail());
         Calendar cal = Calendar.getInstance();
         message.put("timestamp", dateFormat.format(cal.getTime()));
@@ -280,7 +347,6 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
         messageRec.put(hash.toString(), message);
         db.collection("Messages").document(sender).set(messageRec, SetOptions.merge());
         messageAdapter.notifyDataSetChanged();
-
     }
 
     private void getData() {
@@ -307,4 +373,45 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
     }
 
 
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        if (Geocoder.isPresent()) {
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
+
+            List<Address> ls = null;
+            try {
+                ls = geocoder.getFromLocation(latitude, longitude, 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            String city = ls.get(0).getLocality();
+            String prov = ls.get(0).getAdminArea();
+            String country = ls.get(0).getCountryName();
+            String address = city + ", " + prov + ", " + country;
+
+            addLocationAddress(address);
+        }
+
+    }
+
+    public void addLocationAddress(String address) {
+        Map<String, Object> messageRec = new HashMap<>();
+        Map<String, Object> message = new HashMap<>();
+        UUID hash = UUID.randomUUID();
+        message.put("message", address);
+        message.put("location", true);
+        message.put("audio", "Sample audio");
+        message.put("image", "sample image");
+        message.put("receiver", name);
+        message.put("sender", FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        Calendar cal = Calendar.getInstance();
+        message.put("timestamp", dateFormat.format(cal.getTime()));
+
+        messageRec.put(hash.toString(), message);
+        db.collection("Messages").document(sender).set(messageRec, SetOptions.merge());
+        messageAdapter.notifyDataSetChanged();
+        setChatHistory();
+    }
 }
