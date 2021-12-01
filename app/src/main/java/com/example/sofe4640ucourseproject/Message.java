@@ -5,16 +5,20 @@ import java.util.Date;
 public class Message {
     String message,senderId, urlImage;
     Date timestamp;
-    Boolean location;
+    boolean isLocation;
 
     public Message(){}
 
-    public Message(String message, String sender, Date timestamp, Boolean location){//{,String urlImage){
+    public Message(String message, String sender, Date timestamp, String location){
         this.message = message;
         this.senderId = sender;
         this.timestamp = timestamp;
-        this.urlImage = urlImage;
-        this.location = location;
+//        this.urlImage = urlImage;
+        if (location.equals("true")) {
+            this.isLocation = true;
+        } else {
+            this.isLocation = false;
+        }
     }
 
     public String getUrlImage() {
@@ -47,5 +51,9 @@ public class Message {
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public boolean getLocationBoolaen() {
+        return this.isLocation;
     }
 }

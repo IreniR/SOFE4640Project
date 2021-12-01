@@ -23,8 +23,10 @@ import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -113,12 +115,10 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
         setChatHistory();
         chatList = new ArrayList<>();
 
+        popupMenu.getMenuInflater().inflate(R.menu.menu, popupMenu.getMenu());
         menu_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-//                showPopup(view);
-                popupMenu.getMenuInflater().inflate(R.menu.menu, popupMenu.getMenu());
                 popupMenu.show();
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 
@@ -137,6 +137,8 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                         return false;
                     }
                 });
+
+                popupMenu.show();
             }
         });
 
@@ -225,7 +227,6 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
-
                 receive_message_List = new ArrayList<>();
 
                 if (task.isSuccessful()) {
@@ -242,17 +243,13 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
 
                                 if (jsonObject.get("receiver").equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
                                     try {
-                                        Boolean location = false;
-                                        if (jsonObject.get("location").equals("true"))
-                                            location = true;
-                                        newMessage = new Message(jsonObject.get("message").toString(), jsonObject.get("sender").toString(), dateFormat.parse(jsonObject.get("timestamp").toString()), location);
+                                        newMessage = new Message(jsonObject.get("message").toString(), jsonObject.get("sender").toString(), dateFormat.parse(jsonObject.get("timestamp").toString()), jsonObject.get("location").toString());
                                     } catch (ParseException e) {
                                         e.printStackTrace();
                                     }
 
 
                                     receive_message_List.add(newMessage);
-                                    chatList.addAll(receive_message_List);
 
                                     messageAdapter = new MessageAdapter(ChatPage.this, chatList);
                                     chatMessagesDisplay.setAdapter(messageAdapter);
@@ -264,11 +261,29 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                                 e.printStackTrace();
                             }
                         }
+
+                        chatList.addAll(receive_message_List);
                     }
                 }
             }
         });
         messageAdapter.notifyDataSetChanged();
+
+        chatMessagesDisplay.addOnItemTouchListener(
+                new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View v, int position) {
+                        Message m = chatList.get(position);
+                        System.out.println("Location: " + m.getLocationBoolaen());
+                        if (m.getLocationBoolaen()) {
+                            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + m.message);
+                            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                            mapIntent.setPackage("com.google.android.apps.maps");
+                            startActivity(mapIntent);
+                        }
+                    }
+                })
+        );
     }
 
     private void setChatHistorySent() {
@@ -289,11 +304,8 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
                                 jsonObject = new JSONObject(json);
 
                                 if (jsonObject.get("receiver").equals(name)) {
-                                    Boolean location = false;
-                                    if (jsonObject.get("location").equals("true"))
-                                        location = true;
                                     try {
-                                        newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail(), dateFormat.parse(jsonObject.get("timestamp").toString()), location);
+                                        newMessage = new Message(jsonObject.get("message").toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail(), dateFormat.parse(jsonObject.get("timestamp").toString()), jsonObject.get("location").toString());
                                     } catch (ParseException e) {
                                         e.printStackTrace();
                                     }
@@ -327,6 +339,7 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
         message.put("audio", "Sample audio");
         message.put("image", "sample image");
         message.put("receiver", name);
+        message.put("location", false);
         message.put("sender", FirebaseAuth.getInstance().getCurrentUser().getEmail());
         Calendar cal = Calendar.getInstance();
         message.put("timestamp", dateFormat.format(cal.getTime()));
@@ -381,11 +394,6 @@ public class ChatPage extends AppCompatActivity implements PopupMenu.OnMenuItemC
             addLocationAddress(address);
         }
 
-//        System.out.println(location.getLatitude() + " " + location.getLongitude());
-//        Uri gmmIntentUri = Uri.parse("geo:" + location.getLatitude() + "," + location.getLongitude());
-//        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-//        mapIntent.setPackage("com.google.android.apps.maps");
-//        startActivity(mapIntent);
     }
 
     public void addLocationAddress(String address) {
